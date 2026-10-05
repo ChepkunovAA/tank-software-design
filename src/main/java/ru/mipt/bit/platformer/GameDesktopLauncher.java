@@ -5,17 +5,26 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import ru.mipt.bit.platformer.controller.GameController;
+import ru.mipt.bit.platformer.controller.GameControllerImpl;
 import ru.mipt.bit.platformer.controller.RenderController;
+import ru.mipt.bit.platformer.controller.RenderControllerImpl;
+import ru.mipt.bit.platformer.input.InputHandler;
 import ru.mipt.bit.platformer.input.KeyboardInputHandler;
 import ru.mipt.bit.platformer.models.GameModel;
+import ru.mipt.bit.platformer.renderer.TankRenderer;
+import ru.mipt.bit.platformer.renderer.TreeRenderer;
 import ru.mipt.bit.platformer.util.AbstractAction;
 import ru.mipt.bit.platformer.util.MoveAction;
+
+import static ru.mipt.bit.platformer.config.ConfigureConstants.*;
 
 public class GameDesktopLauncher implements ApplicationListener {
 
     private GameModel gameState;
-    private KeyboardInputHandler inputHandler;
+    private InputHandler inputHandler;
     private GameController gameController;
     private RenderController renderController;
 
@@ -24,18 +33,22 @@ public class GameDesktopLauncher implements ApplicationListener {
     public void create() {
         gameState = new GameModel();
 
-        inputHandler = new KeyboardInputHandler();
-        inputHandler.addKey(Input.Keys.W, MoveAction.UP());
-        inputHandler.addKey(Input.Keys.UP, MoveAction.UP());
-        inputHandler.addKey(Input.Keys.S, MoveAction.DOWN());
-        inputHandler.addKey(Input.Keys.DOWN, MoveAction.DOWN());
-        inputHandler.addKey(Input.Keys.A, MoveAction.LEFT());
-        inputHandler.addKey(Input.Keys.LEFT, MoveAction.LEFT());
-        inputHandler.addKey(Input.Keys.D, MoveAction.RIGHT());
-        inputHandler.addKey(Input.Keys.RIGHT, MoveAction.RIGHT());
+        inputHandler = new KeyboardInputHandler()
+                .addKey(Input.Keys.W, MoveAction.UP())
+                .addKey(Input.Keys.UP, MoveAction.UP())
+                .addKey(Input.Keys.S, MoveAction.DOWN())
+                .addKey(Input.Keys.DOWN, MoveAction.DOWN())
+                .addKey(Input.Keys.A, MoveAction.LEFT())
+                .addKey(Input.Keys.LEFT, MoveAction.LEFT())
+                .addKey(Input.Keys.D, MoveAction.RIGHT())
+                .addKey(Input.Keys.RIGHT, MoveAction.RIGHT());
 
-        gameController = new GameController(gameState);
-        renderController = new RenderController();
+        gameController = new GameControllerImpl(gameState);
+
+        TiledMap level = new TmxMapLoader().load(LEVEL_TEXTURE);
+        TankRenderer tankRenderer = new TankRenderer(TANK_TEXTURE);
+        TreeRenderer treeRenderer = new TreeRenderer(TREE_TEXTURE);
+        renderController = new RenderControllerImpl(level, tankRenderer, treeRenderer);
     }
 
     @Override
