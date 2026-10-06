@@ -2,85 +2,54 @@ package ru.mipt.bit.platformer;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.MapRenderer;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.Rectangle;
-import ru.mipt.bit.platformer.util.ObjectMovement;
-import ru.mipt.bit.platformer.util.Tank;
-import ru.mipt.bit.platformer.util.TileMovement;
-import ru.mipt.bit.platformer.util.Tree;
-
-import static com.badlogic.gdx.Input.Keys.*;
-import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
-import static com.badlogic.gdx.math.MathUtils.isEqual;
-import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
+import ru.mipt.bit.platformer.controller.GameController;
+import ru.mipt.bit.platformer.controller.RenderController;
+import ru.mipt.bit.platformer.input.KeyboardInputHandler;
+import ru.mipt.bit.platformer.models.GameModel;
+import ru.mipt.bit.platformer.util.AbstractAction;
+import ru.mipt.bit.platformer.util.MoveAction;
 
 public class GameDesktopLauncher implements ApplicationListener {
 
-    private static final float MOVEMENT_SPEED = 0.4f;
-
-    private Batch batch;
-
-    private TiledMap level;
-    private MapRenderer levelRenderer;
-    private TileMovement tileMovement;
-
-    private Tank playerTank;
-    private Tree obstacleTree;
+    private GameModel gameState;
+    private KeyboardInputHandler inputHandler;
+    private GameController gameController;
+    private RenderController renderController;
 
 
     @Override
     public void create() {
-        batch = new SpriteBatch();
+        gameState = new GameModel();
 
-        // load level tiles
-        level = new TmxMapLoader().load("level.tmx");
-        levelRenderer = createSingleLayerMapRenderer(level, batch);
-        TiledMapTileLayer groundLayer = getSingleLayer(level);
-        tileMovement = new TileMovement(groundLayer, Interpolation.smooth);
+        inputHandler = new KeyboardInputHandler();
+        inputHandler.addKey(Input.Keys.W, MoveAction.UP());
+        inputHandler.addKey(Input.Keys.UP, MoveAction.UP());
+        inputHandler.addKey(Input.Keys.S, MoveAction.DOWN());
+        inputHandler.addKey(Input.Keys.DOWN, MoveAction.DOWN());
+        inputHandler.addKey(Input.Keys.A, MoveAction.LEFT());
+        inputHandler.addKey(Input.Keys.LEFT, MoveAction.LEFT());
+        inputHandler.addKey(Input.Keys.D, MoveAction.RIGHT());
+        inputHandler.addKey(Input.Keys.RIGHT, MoveAction.RIGHT());
 
-        playerTank = new Tank("images/tank_blue.png", new GridPoint2(1, 1));
-        obstacleTree = new Tree("images/greenTree.png", new GridPoint2(1, 3), groundLayer);
+        gameController = new GameController(gameState);
+        renderController = new RenderController();
     }
 
     @Override
     public void render() {
-        // clear the screen
-        Gdx.gl.glClearColor(0f, 0f, 0.2f, 1f);
-        Gdx.gl.glClear(GL_COLOR_BUFFER_BIT);
+        AbstractAction inputAction = inputHandler.getActionTriggered();
+        if (inputAction != null) {
+            inputAction.execute(gameState);
+        }
 
         // get time passed since the last render
         float deltaTime = Gdx.graphics.getDeltaTime();
 
-        for (ObjectMovement movement : ObjectMovement.values()) {
-            if (movement.isActive(Gdx.input)) {
-                playerTank.tryMove(movement, obstacleTree);
-            }
-        }
-
-        playerTank.processMovement(tileMovement, deltaTime);
-
-        // render each tile of the level
-        levelRenderer.render();
-
-        // start recording all drawing commands
-        batch.begin();
-
-        playerTank.render(batch);
-        obstacleTree.render(batch);
-
-        // submit all drawing requests
-        batch.end();
+        gameController.update(deltaTime);
+        renderController.render(gameState);
     }
 
     @Override
@@ -101,10 +70,7 @@ public class GameDesktopLauncher implements ApplicationListener {
     @Override
     public void dispose() {
         // dispose of all the native resources (classes which implement com.badlogic.gdx.utils.Disposable)
-        playerTank.dispose();
-        obstacleTree.dispose();
-        level.dispose();
-        batch.dispose();
+        renderController.dispose();
     }
 
     public static void main(String[] args) {
