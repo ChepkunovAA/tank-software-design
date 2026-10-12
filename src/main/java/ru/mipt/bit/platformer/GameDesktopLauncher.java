@@ -13,6 +13,8 @@ import ru.mipt.bit.platformer.controller.RenderController;
 import ru.mipt.bit.platformer.controller.RenderControllerImpl;
 import ru.mipt.bit.platformer.input.InputHandler;
 import ru.mipt.bit.platformer.input.KeyboardInputHandler;
+import ru.mipt.bit.platformer.level.ConfiguredLevelFactory;
+import ru.mipt.bit.platformer.level.LevelFactory;
 import ru.mipt.bit.platformer.models.GameModel;
 import ru.mipt.bit.platformer.renderer.TankRenderer;
 import ru.mipt.bit.platformer.renderer.TreeRenderer;
@@ -31,8 +33,28 @@ public class GameDesktopLauncher implements ApplicationListener {
 
     @Override
     public void create() {
-        gameState = new GameModel();
+        GameStartLauncher();
 
+        initInputHandler();
+
+        gameController = new GameControllerImpl(gameState);
+
+        initGraphic();
+    }
+
+    private void GameStartLauncher() {
+        LevelFactory levelFactory = new ConfiguredLevelFactory();
+        gameState = levelFactory.generate();
+    }
+
+    private void initGraphic() {
+        TiledMap level = new TmxMapLoader().load(LEVEL_TEXTURE);
+        TankRenderer tankRenderer = new TankRenderer(TANK_TEXTURE);
+        TreeRenderer treeRenderer = new TreeRenderer(TREE_TEXTURE);
+        renderController = new RenderControllerImpl(level, tankRenderer, treeRenderer);
+    }
+
+    private void initInputHandler() {
         inputHandler = new KeyboardInputHandler()
                 .addKey(Input.Keys.W, MoveAction.UP())
                 .addKey(Input.Keys.UP, MoveAction.UP())
@@ -42,13 +64,6 @@ public class GameDesktopLauncher implements ApplicationListener {
                 .addKey(Input.Keys.LEFT, MoveAction.LEFT())
                 .addKey(Input.Keys.D, MoveAction.RIGHT())
                 .addKey(Input.Keys.RIGHT, MoveAction.RIGHT());
-
-        gameController = new GameControllerImpl(gameState);
-
-        TiledMap level = new TmxMapLoader().load(LEVEL_TEXTURE);
-        TankRenderer tankRenderer = new TankRenderer(TANK_TEXTURE);
-        TreeRenderer treeRenderer = new TreeRenderer(TREE_TEXTURE);
-        renderController = new RenderControllerImpl(level, tankRenderer, treeRenderer);
     }
 
     @Override
