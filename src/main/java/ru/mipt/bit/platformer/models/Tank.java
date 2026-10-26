@@ -3,7 +3,7 @@ package ru.mipt.bit.platformer.models;
 import com.badlogic.gdx.math.GridPoint2;
 import ru.mipt.bit.platformer.util.Direction;
 
-import java.util.List;
+import java.util.Collection;
 
 import static ru.mipt.bit.platformer.util.GdxGameUtils.continueProgress;
 
@@ -20,16 +20,18 @@ public class Tank extends FieldObject {
         this.movementProgress = 1f;
     }
 
-    public void tryMove(Direction movement, List<Tree> obstacles) {
+    public void tryMove(Direction movement, Collection<GridPoint2> obstacles,
+                        int fieldWidth, int fieldHeight) {
         if (!isMovementEnded()) {
             return;
         }
         GridPoint2 target = new GridPoint2(coordinates).add(movement.getShift());
         rotation = movement.getRotation();
-        for (Tree obstacle : obstacles) {
-            if (target.equals(obstacle.getCoordinates())) {
-                return;
-            }
+        if (target.x < 0 || target.x >= fieldWidth || target.y < 0 || target.y >= fieldHeight) {
+            return;
+        }
+        if (obstacles.contains(target)) {
+            return;
         }
         movementProgress = 0f;
         targetCoordinates = target;

@@ -8,6 +8,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Interpolation;
 import ru.mipt.bit.platformer.models.GameModel;
+import ru.mipt.bit.platformer.models.Tank;
 import ru.mipt.bit.platformer.models.Tree;
 import ru.mipt.bit.platformer.renderer.TankRenderer;
 import ru.mipt.bit.platformer.renderer.TreeRenderer;
@@ -42,8 +43,10 @@ public class RenderControllerImpl implements RenderController {
         levelRenderer.render();
 
         batch.begin();
-        tankRenderer.render(batch, model.getPlayerTank(), tileMovement);
-        for (Tree tree : model.getObstacles()) {
+        for (Tank tank : model.getTanks()) {
+            tankRenderer.render(batch, tank, tileMovement);
+        }
+        for (Tree tree : model.getTrees()) {
             treeRenderer.render(batch, tree, groundLayer);
         }
         batch.end();

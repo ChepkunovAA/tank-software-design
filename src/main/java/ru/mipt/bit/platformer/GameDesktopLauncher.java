@@ -16,6 +16,7 @@ import ru.mipt.bit.platformer.input.KeyboardInputHandler;
 import ru.mipt.bit.platformer.level.ConfiguredLevelFactory;
 import ru.mipt.bit.platformer.level.LevelFactory;
 import ru.mipt.bit.platformer.models.GameModel;
+import ru.mipt.bit.platformer.models.Tank;
 import ru.mipt.bit.platformer.renderer.TankRenderer;
 import ru.mipt.bit.platformer.renderer.TreeRenderer;
 import ru.mipt.bit.platformer.util.AbstractAction;
@@ -55,15 +56,16 @@ public class GameDesktopLauncher implements ApplicationListener {
     }
 
     private void initInputHandler() {
+        Tank playerTank = gameState.getPlayerTank();
         inputHandler = new KeyboardInputHandler()
-                .addKey(Input.Keys.W, MoveAction.UP())
-                .addKey(Input.Keys.UP, MoveAction.UP())
-                .addKey(Input.Keys.S, MoveAction.DOWN())
-                .addKey(Input.Keys.DOWN, MoveAction.DOWN())
-                .addKey(Input.Keys.A, MoveAction.LEFT())
-                .addKey(Input.Keys.LEFT, MoveAction.LEFT())
-                .addKey(Input.Keys.D, MoveAction.RIGHT())
-                .addKey(Input.Keys.RIGHT, MoveAction.RIGHT());
+                .addKey(Input.Keys.W, MoveAction.UP(playerTank))
+                .addKey(Input.Keys.UP, MoveAction.UP(playerTank))
+                .addKey(Input.Keys.S, MoveAction.DOWN(playerTank))
+                .addKey(Input.Keys.DOWN, MoveAction.DOWN(playerTank))
+                .addKey(Input.Keys.A, MoveAction.LEFT(playerTank))
+                .addKey(Input.Keys.LEFT, MoveAction.LEFT(playerTank))
+                .addKey(Input.Keys.D, MoveAction.RIGHT(playerTank))
+                .addKey(Input.Keys.RIGHT, MoveAction.RIGHT(playerTank));
     }
 
     @Override

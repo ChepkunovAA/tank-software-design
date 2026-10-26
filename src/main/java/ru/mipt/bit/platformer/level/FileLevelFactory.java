@@ -20,6 +20,7 @@ public class FileLevelFactory implements LevelFactory {
     private static final char EMPTY_CELL = '_';
     private static final char TREE_CELL = 'T';
     private static final char PLAYER_CELL = 'X';
+    private static final char NPC_CELL = 'N';
 
     private final String resourcePath;
 
@@ -43,6 +44,7 @@ public class FileLevelFactory implements LevelFactory {
         validateRectangle(rows, width);
 
         Tank playerTank = null;
+        List<Tank> npcTanks = new ArrayList<>();
         List<Tree> trees = new ArrayList<>();
         for (int row = 0; row < height; row++) {
             for (int col = 0; col < width; col++) {
@@ -60,6 +62,9 @@ public class FileLevelFactory implements LevelFactory {
                         }
                         playerTank = new Tank(coordinates);
                         break;
+                    case NPC_CELL:
+                        npcTanks.add(new Tank(coordinates));
+                        break;
                     default:
                         throw new IllegalArgumentException(
                                 "Unknown symbol '" + symbol + "' in level file: " + resourcePath);
@@ -70,7 +75,7 @@ public class FileLevelFactory implements LevelFactory {
         if (playerTank == null) {
             throw new IllegalStateException("Level does not contain a player: " + resourcePath);
         }
-        return new GameModel(playerTank, trees);
+        return new GameModel(playerTank, npcTanks, trees, width, height);
     }
 
     private List<String> readRows() {
