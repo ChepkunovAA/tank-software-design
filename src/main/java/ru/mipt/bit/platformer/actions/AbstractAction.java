@@ -1,4 +1,4 @@
-package ru.mipt.bit.platformer.util;
+package ru.mipt.bit.platformer.actions;
 
 import ru.mipt.bit.platformer.models.GameModel;
 

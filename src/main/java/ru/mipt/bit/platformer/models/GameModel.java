@@ -9,10 +9,13 @@ import java.util.List;
 import java.util.Set;
 
 public class GameModel {
-    private final Tank playerTank;
+    private Tank playerTank;
     private final List<Tank> npcTanks;
     private final List<Tank> allTanks;
     private final List<Tree> trees;
+
+    private final List<Bullet> bullets;
+
     private final int fieldWidth;
     private final int fieldHeight;
 
@@ -27,6 +30,8 @@ public class GameModel {
         this.allTanks = new ArrayList<>(npcTanks.size() + 1);
         allTanks.add(playerTank);
         allTanks.addAll(npcTanks);
+
+        this.bullets = new ArrayList<>();
     }
 
     public Tank getPlayerTank() {
@@ -45,6 +50,18 @@ public class GameModel {
         return trees;
     }
 
+    public void destroyTank(Tank tank) {
+        if (playerTank == tank) {
+            playerTank = null;
+        }
+        npcTanks.remove(tank);
+        allTanks.remove(tank);
+    }
+
+    public void destroyBullet(Bullet bullet) {
+        bullets.remove(bullet);
+    }
+
     public Set<GridPoint2> getObstacles() {
         Set<GridPoint2> coordinates = new HashSet<>();
         for (Tank tank : allTanks) {
@@ -57,7 +74,38 @@ public class GameModel {
         return coordinates;
     }
 
+    public List<FieldObject> getAllObjects() {
+        List<FieldObject> objects = new ArrayList<>();
+        objects.addAll(allTanks);
+        objects.addAll(trees);
+        objects.addAll(bullets);
+        return objects;
+    }
+
     public void tryMove(Tank tank, Direction direction) {
-        tank.tryMove(direction, getObstacles(), fieldWidth, fieldHeight);
+        tank.tryMove(direction, this);
+    }
+
+    public void shoot(Tank tank) {
+        Bullet newBullet = tank.tryShoot(fieldWidth, fieldHeight);
+        if (newBullet != null) {
+            bullets.add(newBullet);
+        }
+    }
+
+    public void live(float tick) {
+        for (FieldObject object : getAllObjects()) {
+            object.live(tick);
+        }
+    }
+    
+    public boolean isAvaibale(GridPoint2 coordinates) {
+        return !(getObstacles().contains(coordinates) ||
+                coordinates.x < 0 || coordinates.x >= fieldWidth ||
+                coordinates.y < 0 || coordinates.y >= fieldHeight);
+    }
+
+    public List<Bullet> getBullets() {
+        return this.bullets;
     }
 }

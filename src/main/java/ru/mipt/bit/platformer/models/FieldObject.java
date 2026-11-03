@@ -11,6 +11,10 @@ public abstract class FieldObject {
         this.rotation = 0f;
     }
 
+    public void live(float tick) {}
+
+    public void handleHit(FieldObject object, GameModel model) {}
+
     public GridPoint2 getCoordinates() { return coordinates; }
 
     public float getRotation() { return rotation; }

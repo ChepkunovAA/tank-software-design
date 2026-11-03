@@ -26,4 +26,14 @@ public enum Direction {
     public float getRotation() {
         return rotation;
     }
+
+    public static Direction getDirectionByRotation(float rotation) {
+        switch ((int) rotation) {
+            case (90): return Direction.UP;
+            case (-90): return Direction.DOWN;
+            case (180): return Direction.LEFT;
+            case (0): return Direction.RIGHT;
+        }
+        throw new RuntimeException("Некорректное направление");
+    }
 }

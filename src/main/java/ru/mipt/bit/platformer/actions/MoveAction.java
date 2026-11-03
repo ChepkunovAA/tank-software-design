@@ -1,7 +1,8 @@
-package ru.mipt.bit.platformer.util;
+package ru.mipt.bit.platformer.actions;
 
 import ru.mipt.bit.platformer.models.GameModel;
 import ru.mipt.bit.platformer.models.Tank;
+import ru.mipt.bit.platformer.util.Direction;
 
 public class MoveAction implements AbstractAction {
 

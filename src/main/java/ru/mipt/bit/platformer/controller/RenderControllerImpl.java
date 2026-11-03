@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Interpolation;
 import ru.mipt.bit.platformer.models.GameModel;
 import ru.mipt.bit.platformer.models.Tank;
@@ -28,7 +27,8 @@ public class RenderControllerImpl implements RenderController {
     private final TankRenderer tankRenderer;
     private final TreeRenderer treeRenderer;
 
-    public RenderControllerImpl(TiledMap level, TankRenderer tankRenderer, TreeRenderer treeRenderer) {
+    public RenderControllerImpl(TiledMap level, TankRenderer tankRenderer,
+                                TreeRenderer treeRenderer) {
         this.batch = new SpriteBatch();
         this.tankRenderer = tankRenderer;
         this.treeRenderer = treeRenderer;

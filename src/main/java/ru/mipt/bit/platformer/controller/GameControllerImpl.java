@@ -1,39 +1,31 @@
 package ru.mipt.bit.platformer.controller;
 
+import ru.mipt.bit.platformer.actions.AbstractAction;
+import ru.mipt.bit.platformer.actions.NpcActionGenerator;
 import ru.mipt.bit.platformer.models.GameModel;
 import ru.mipt.bit.platformer.models.Tank;
-import ru.mipt.bit.platformer.util.Direction;
-import ru.mipt.bit.platformer.util.MoveAction;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameControllerImpl implements GameController {
 
     private final GameModel gameModel;
-    private final Random random;
+    private final NpcActionGenerator npcActionGenerator;
 
-    public GameControllerImpl(GameModel gameModel) {
-        this(gameModel, new Random());
-    }
-
-    GameControllerImpl(GameModel gameModel, Random random) {
+    public GameControllerImpl(GameModel gameModel, NpcActionGenerator npcActionGenerator) {
         this.gameModel = gameModel;
-        this.random = random;
+        this.npcActionGenerator = npcActionGenerator;
     }
 
-    public void update(float deltaTime) {
-        gameModel.getPlayerTank().processMovement(deltaTime);
-
+    @Override
+    public List<AbstractAction> getActions() {
+        List<AbstractAction> actions = new ArrayList<>();
         for (Tank npcTank : gameModel.getNpcTanks()) {
-            if (npcTank.isMovementEnded()) {
-                new MoveAction(npcTank, randomDirection()).execute(gameModel);
+            if (npcTank.isFree()) {
+                actions.add(npcActionGenerator.getNextAction(npcTank));
             }
-            npcTank.processMovement(deltaTime);
         }
-    }
-
-    private Direction randomDirection() {
-        Direction[] directions = Direction.values();
-        return directions[random.nextInt(directions.length)];
+        return actions;
     }
 }

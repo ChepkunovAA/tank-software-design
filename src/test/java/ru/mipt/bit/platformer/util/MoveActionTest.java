@@ -2,6 +2,7 @@ package ru.mipt.bit.platformer.util;
 
 import com.badlogic.gdx.math.GridPoint2;
 import org.junit.Test;
+import ru.mipt.bit.platformer.actions.MoveAction;
 import ru.mipt.bit.platformer.models.GameModel;
 import ru.mipt.bit.platformer.models.Tank;
 
@@ -19,7 +20,7 @@ public class MoveActionTest {
         new MoveAction(model.getPlayerTank(), Direction.LEFT).execute(model);
 
         assertEquals(new GridPoint2(0, 0), model.getPlayerTank().getTargetCoordinates());
-        assertTrue(model.getPlayerTank().isMovementEnded());
+        assertTrue(model.getPlayerTank().isFree());
     }
 
     @Test

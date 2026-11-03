@@ -1,6 +1,6 @@
 package ru.mipt.bit.platformer.input;
 
-import ru.mipt.bit.platformer.util.AbstractAction;
+import ru.mipt.bit.platformer.actions.AbstractAction;
 
 
 public interface InputHandler {

@@ -15,6 +15,7 @@ import java.util.Random;
 import static ru.mipt.bit.platformer.config.ConfigureConstants.FIELD_HEIGHT;
 import static ru.mipt.bit.platformer.config.ConfigureConstants.FIELD_WIDTH;
 import static ru.mipt.bit.platformer.config.ConfigureConstants.LEVEL_PROPERTIES;
+import static ru.mipt.bit.platformer.util.PropertyReader.readLevelProperties;
 
 public class RandomLevelFactory implements LevelFactory {
 
@@ -28,7 +29,7 @@ public class RandomLevelFactory implements LevelFactory {
     private final Random random;
 
     public RandomLevelFactory() {
-        this(FIELD_WIDTH, FIELD_HEIGHT, readProperties(), new Random());
+        this(FIELD_WIDTH, FIELD_HEIGHT, readLevelProperties(), new Random());
     }
 
     RandomLevelFactory(int width, int height, Properties properties, Random random) {
@@ -70,19 +71,5 @@ public class RandomLevelFactory implements LevelFactory {
 
     private GridPoint2 toCoordinates(int index) {
         return new GridPoint2(index % width, index / width);
-    }
-
-    private static Properties readProperties() {
-        Properties properties = new Properties();
-        try (InputStream input = RandomLevelFactory.class.getClassLoader()
-                .getResourceAsStream(LEVEL_PROPERTIES)) {
-            if (input == null) {
-                throw new IllegalStateException("Resource not found: " + LEVEL_PROPERTIES);
-            }
-            properties.load(input);
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to read resource: " + LEVEL_PROPERTIES, e);
-        }
-        return properties;
     }
 }

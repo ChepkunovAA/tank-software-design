@@ -7,6 +7,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import ru.mipt.bit.platformer.actions.*;
 import ru.mipt.bit.platformer.controller.GameController;
 import ru.mipt.bit.platformer.controller.GameControllerImpl;
 import ru.mipt.bit.platformer.controller.RenderController;
@@ -19,8 +20,9 @@ import ru.mipt.bit.platformer.models.GameModel;
 import ru.mipt.bit.platformer.models.Tank;
 import ru.mipt.bit.platformer.renderer.TankRenderer;
 import ru.mipt.bit.platformer.renderer.TreeRenderer;
-import ru.mipt.bit.platformer.util.AbstractAction;
-import ru.mipt.bit.platformer.util.MoveAction;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static ru.mipt.bit.platformer.config.ConfigureConstants.*;
 
@@ -38,9 +40,14 @@ public class GameDesktopLauncher implements ApplicationListener {
 
         initInputHandler();
 
-        gameController = new GameControllerImpl(gameState);
+        initGameController();
 
         initGraphic();
+    }
+
+    private void initGameController() {
+        NpcActionGenerator npcActionGenerator = new RandomNpcActionGenerator();
+        gameController = new GameControllerImpl(gameState, npcActionGenerator);
     }
 
     private void GameStartLauncher() {
@@ -65,21 +72,38 @@ public class GameDesktopLauncher implements ApplicationListener {
                 .addKey(Input.Keys.A, MoveAction.LEFT(playerTank))
                 .addKey(Input.Keys.LEFT, MoveAction.LEFT(playerTank))
                 .addKey(Input.Keys.D, MoveAction.RIGHT(playerTank))
-                .addKey(Input.Keys.RIGHT, MoveAction.RIGHT(playerTank));
+                .addKey(Input.Keys.RIGHT, MoveAction.RIGHT(playerTank))
+                .addKey(Input.Keys.SPACE, new ShootAction(playerTank));
     }
 
     @Override
     public void render() {
-        AbstractAction inputAction = inputHandler.getActionTriggered();
-        if (inputAction != null) {
-            inputAction.execute(gameState);
-        }
+        List<AbstractAction> actions = getActions();
+        executeActions(actions);
+        live();
+        renderController.render(gameState);
+    }
 
+    private void live() {
         // get time passed since the last render
         float deltaTime = Gdx.graphics.getDeltaTime();
+        gameState.live(deltaTime);
+    }
 
-        gameController.update(deltaTime);
-        renderController.render(gameState);
+    private void executeActions(List<AbstractAction> actions) {
+        for (AbstractAction action : actions) {
+            if (action != null) {
+                action.execute(gameState);
+            }
+        }
+    }
+
+    private List<AbstractAction> getActions() {
+        List<AbstractAction> actions = new ArrayList<>();
+        actions.add(new BulletShiftAction());
+        actions.add(inputHandler.getActionTriggered());
+        actions.addAll(gameController.getActions());
+        return actions;
     }
 
     @Override
