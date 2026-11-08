@@ -1,7 +1,6 @@
 package ru.mipt.bit.platformer.actions;
 
-import ru.mipt.bit.platformer.models.GameModel;
-import ru.mipt.bit.platformer.models.Tank;
+import ru.mipt.bit.platformer.objects.Tank;
 
 public class ShootAction implements AbstractAction {
     private final Tank tank;
@@ -11,7 +10,7 @@ public class ShootAction implements AbstractAction {
     }
 
     @Override
-    public void execute(GameModel model) {
-        model.shoot(tank);
+    public void execute() {
+        tank.tryShoot();
     }
 }

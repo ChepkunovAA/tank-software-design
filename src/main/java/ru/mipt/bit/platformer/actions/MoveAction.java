@@ -1,7 +1,6 @@
 package ru.mipt.bit.platformer.actions;
 
-import ru.mipt.bit.platformer.models.GameModel;
-import ru.mipt.bit.platformer.models.Tank;
+import ru.mipt.bit.platformer.objects.Tank;
 import ru.mipt.bit.platformer.util.Direction;
 
 public class MoveAction implements AbstractAction {
@@ -31,7 +30,7 @@ public class MoveAction implements AbstractAction {
     }
 
     @Override
-    public void execute(GameModel model) {
-        model.tryMove(tank, direction);
+    public void execute() {
+        tank.tryMove(direction);
     }
 }

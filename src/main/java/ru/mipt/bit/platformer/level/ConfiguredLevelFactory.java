@@ -1,6 +1,6 @@
 package ru.mipt.bit.platformer.level;
 
-import ru.mipt.bit.platformer.models.GameModel;
+import ru.mipt.bit.platformer.game.GameWorld;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +31,7 @@ public class ConfiguredLevelFactory implements LevelFactory {
     }
 
     @Override
-    public GameModel generate() {
+    public GameWorld generate() {
         return delegate.generate();
     }
 

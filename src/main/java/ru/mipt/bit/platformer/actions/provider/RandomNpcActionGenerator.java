@@ -1,22 +1,29 @@
-package ru.mipt.bit.platformer.actions;
+package ru.mipt.bit.platformer.actions.provider;
 
-import ru.mipt.bit.platformer.models.Tank;
+import ru.mipt.bit.platformer.actions.AbstractAction;
+import ru.mipt.bit.platformer.actions.MoveAction;
+import ru.mipt.bit.platformer.actions.ShootAction;
+import ru.mipt.bit.platformer.objects.Tank;
 import ru.mipt.bit.platformer.util.Direction;
 
 import java.util.Properties;
+import java.util.Random;
 
-import static com.badlogic.gdx.math.MathUtils.random;
 import static ru.mipt.bit.platformer.util.PropertyReader.readLevelProperties;
 
-public class RandomNpcActionGenerator implements NpcActionGenerator{
+public class RandomNpcActionGenerator implements NpcActionGenerator {
+
     private static final String NPC_AGGRESSION_PROPERTY = "npc.aggression";
+
     private final float shootProbability;
-    
+    private final Random random;
+
     public RandomNpcActionGenerator() {
-        this(readLevelProperties());
+        this(readLevelProperties(), new Random());
     }
 
-    RandomNpcActionGenerator(Properties properties) {
+    RandomNpcActionGenerator(Properties properties, Random random) {
+        this.random = random;
         this.shootProbability = Float.parseFloat(properties.getProperty(NPC_AGGRESSION_PROPERTY));
     }
 

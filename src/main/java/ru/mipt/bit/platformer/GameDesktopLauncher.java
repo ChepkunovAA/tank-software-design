@@ -6,31 +6,43 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import ru.mipt.bit.platformer.actions.*;
-import ru.mipt.bit.platformer.controller.GameController;
-import ru.mipt.bit.platformer.controller.GameControllerImpl;
-import ru.mipt.bit.platformer.controller.RenderController;
-import ru.mipt.bit.platformer.controller.RenderControllerImpl;
+import com.badlogic.gdx.math.Interpolation;
+import ru.mipt.bit.platformer.actions.AbstractAction;
+import ru.mipt.bit.platformer.actions.provider.ActionProvider;
+import ru.mipt.bit.platformer.actions.provider.ActionProviderImpl;
+import ru.mipt.bit.platformer.actions.MoveAction;
+import ru.mipt.bit.platformer.actions.provider.NpcActionGenerator;
+import ru.mipt.bit.platformer.actions.provider.RandomNpcActionGenerator;
+import ru.mipt.bit.platformer.actions.ShootAction;
+import ru.mipt.bit.platformer.game.GameLoop;
+import ru.mipt.bit.platformer.graphic.RenderController;
+import ru.mipt.bit.platformer.graphic.RenderControllerImpl;
 import ru.mipt.bit.platformer.input.InputHandler;
 import ru.mipt.bit.platformer.input.KeyboardInputHandler;
 import ru.mipt.bit.platformer.level.ConfiguredLevelFactory;
 import ru.mipt.bit.platformer.level.LevelFactory;
-import ru.mipt.bit.platformer.models.GameModel;
-import ru.mipt.bit.platformer.models.Tank;
-import ru.mipt.bit.platformer.renderer.TankRenderer;
-import ru.mipt.bit.platformer.renderer.TreeRenderer;
+import ru.mipt.bit.platformer.game.GameWorld;
+import ru.mipt.bit.platformer.objects.Tank;
+import ru.mipt.bit.platformer.graphic.renderer.BulletRenderer;
+import ru.mipt.bit.platformer.graphic.Scene;
+import ru.mipt.bit.platformer.graphic.renderer.TankRenderer;
+import ru.mipt.bit.platformer.graphic.renderer.TreeRenderer;
+import ru.mipt.bit.platformer.util.TileMovement;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static ru.mipt.bit.platformer.config.ConfigureConstants.*;
+import static ru.mipt.bit.platformer.util.GdxGameUtils.getSingleLayer;
 
 public class GameDesktopLauncher implements ApplicationListener {
 
-    private GameModel gameState;
+    private GameWorld gameState;
     private InputHandler inputHandler;
-    private GameController gameController;
+    private ActionProvider actionProvider;
+    private GameLoop gameLoop;
     private RenderController renderController;
 
 
@@ -40,14 +52,15 @@ public class GameDesktopLauncher implements ApplicationListener {
 
         initInputHandler();
 
-        initGameController();
+        initGameLoop();
 
         initGraphic();
     }
 
-    private void initGameController() {
+    private void initGameLoop() {
         NpcActionGenerator npcActionGenerator = new RandomNpcActionGenerator();
-        gameController = new GameControllerImpl(gameState, npcActionGenerator);
+        actionProvider = new ActionProviderImpl(gameState, npcActionGenerator);
+        gameLoop = new GameLoop(gameState);
     }
 
     private void GameStartLauncher() {
@@ -57,9 +70,16 @@ public class GameDesktopLauncher implements ApplicationListener {
 
     private void initGraphic() {
         TiledMap level = new TmxMapLoader().load(LEVEL_TEXTURE);
-        TankRenderer tankRenderer = new TankRenderer(TANK_TEXTURE);
-        TreeRenderer treeRenderer = new TreeRenderer(TREE_TEXTURE);
-        renderController = new RenderControllerImpl(level, tankRenderer, treeRenderer);
+        TiledMapTileLayer groundLayer = getSingleLayer(level);
+        TileMovement tileMovement = new TileMovement(groundLayer, Interpolation.smooth);
+
+        Scene scene = new Scene(
+                new TankRenderer(TANK_TEXTURE, tileMovement),
+                new TreeRenderer(TREE_TEXTURE, groundLayer),
+                new BulletRenderer(BULLET_TEXTURE, tileMovement));
+        gameState.addObserver(scene);
+
+        renderController = new RenderControllerImpl(level, scene);
     }
 
     private void initInputHandler() {
@@ -78,31 +98,16 @@ public class GameDesktopLauncher implements ApplicationListener {
 
     @Override
     public void render() {
-        List<AbstractAction> actions = getActions();
-        executeActions(actions);
-        live();
-        renderController.render(gameState);
-    }
-
-    private void live() {
         // get time passed since the last render
         float deltaTime = Gdx.graphics.getDeltaTime();
-        gameState.live(deltaTime);
-    }
-
-    private void executeActions(List<AbstractAction> actions) {
-        for (AbstractAction action : actions) {
-            if (action != null) {
-                action.execute(gameState);
-            }
-        }
+        gameLoop.update(deltaTime, getActions());
+        renderController.render();
     }
 
     private List<AbstractAction> getActions() {
         List<AbstractAction> actions = new ArrayList<>();
-        actions.add(new BulletShiftAction());
         actions.add(inputHandler.getActionTriggered());
-        actions.addAll(gameController.getActions());
+        actions.addAll(actionProvider.getActions());
         return actions;
     }
 

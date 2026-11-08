@@ -1,9 +1,10 @@
 package ru.mipt.bit.platformer.level;
 
 import com.badlogic.gdx.math.GridPoint2;
-import ru.mipt.bit.platformer.models.GameModel;
-import ru.mipt.bit.platformer.models.Tank;
-import ru.mipt.bit.platformer.models.Tree;
+import ru.mipt.bit.platformer.game.GameWorld;
+import ru.mipt.bit.platformer.game.GameWorldImpl;
+import ru.mipt.bit.platformer.objects.Tank;
+import ru.mipt.bit.platformer.objects.Tree;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,7 +34,7 @@ public class FileLevelFactory implements LevelFactory {
     }
 
     @Override
-    public GameModel generate() {
+    public GameWorld generate() {
         List<String> rows = readRows();
         if (rows.isEmpty()) {
             throw new IllegalStateException("Level file is empty: " + resourcePath);
@@ -42,6 +43,8 @@ public class FileLevelFactory implements LevelFactory {
         int height = rows.size();
         int width = rows.get(0).length();
         validateRectangle(rows, width);
+
+        GameWorld model = new GameWorldImpl(width, height);
 
         Tank playerTank = null;
         List<Tank> npcTanks = new ArrayList<>();
@@ -60,10 +63,10 @@ public class FileLevelFactory implements LevelFactory {
                         if (playerTank != null) {
                             throw new IllegalStateException("Level contains more than one player: " + resourcePath);
                         }
-                        playerTank = new Tank(coordinates);
+                        playerTank = new Tank(model, coordinates);
                         break;
                     case NPC_CELL:
-                        npcTanks.add(new Tank(coordinates));
+                        npcTanks.add(new Tank(model, coordinates));
                         break;
                     default:
                         throw new IllegalArgumentException(
@@ -75,7 +78,11 @@ public class FileLevelFactory implements LevelFactory {
         if (playerTank == null) {
             throw new IllegalStateException("Level does not contain a player: " + resourcePath);
         }
-        return new GameModel(playerTank, npcTanks, trees, width, height);
+
+        model.addPlayerTank(playerTank);
+        npcTanks.forEach(model::addObject);
+        trees.forEach(model::addObject);
+        return model;
     }
 
     private List<String> readRows() {

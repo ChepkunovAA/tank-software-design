@@ -2,7 +2,6 @@ package ru.mipt.bit.platformer.input;
 
 import com.badlogic.gdx.Gdx;
 import ru.mipt.bit.platformer.actions.AbstractAction;
-import ru.mipt.bit.platformer.actions.MoveAction;
 
 import java.util.HashMap;
 import java.util.Map;

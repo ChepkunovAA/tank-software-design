@@ -1,12 +1,11 @@
 package ru.mipt.bit.platformer.level;
 
 import com.badlogic.gdx.math.GridPoint2;
-import ru.mipt.bit.platformer.models.GameModel;
-import ru.mipt.bit.platformer.models.Tank;
-import ru.mipt.bit.platformer.models.Tree;
+import ru.mipt.bit.platformer.game.GameWorld;
+import ru.mipt.bit.platformer.game.GameWorldImpl;
+import ru.mipt.bit.platformer.objects.Tank;
+import ru.mipt.bit.platformer.objects.Tree;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -14,7 +13,6 @@ import java.util.Random;
 
 import static ru.mipt.bit.platformer.config.ConfigureConstants.FIELD_HEIGHT;
 import static ru.mipt.bit.platformer.config.ConfigureConstants.FIELD_WIDTH;
-import static ru.mipt.bit.platformer.config.ConfigureConstants.LEVEL_PROPERTIES;
 import static ru.mipt.bit.platformer.util.PropertyReader.readLevelProperties;
 
 public class RandomLevelFactory implements LevelFactory {
@@ -48,7 +46,9 @@ public class RandomLevelFactory implements LevelFactory {
     }
 
     @Override
-    public GameModel generate() {
+    public GameWorld generate() {
+        GameWorld model = new GameWorldImpl(width, height);
+
         int totalCells = width * height;
         int playerIndex = random.nextInt(totalCells);
 
@@ -60,13 +60,16 @@ public class RandomLevelFactory implements LevelFactory {
             }
             GridPoint2 coordinates = toCoordinates(i);
             if (random.nextFloat() < tankProbability) {
-                npcTanks.add(new Tank(coordinates));
+                npcTanks.add(new Tank(model, coordinates));
             } else if (random.nextFloat() < treeProbability) {
                 trees.add(new Tree(coordinates));
             }
         }
 
-        return new GameModel(new Tank(toCoordinates(playerIndex)), npcTanks, trees, width, height);
+        model.addPlayerTank(new Tank(model, toCoordinates(playerIndex)));
+        npcTanks.forEach(model::addObject);
+        trees.forEach(model::addObject);
+        return model;
     }
 
     private GridPoint2 toCoordinates(int index) {

@@ -1,9 +1,9 @@
-package ru.mipt.bit.platformer.controller;
+package ru.mipt.bit.platformer.actions.provider;
 
 import ru.mipt.bit.platformer.actions.AbstractAction;
 
 import java.util.List;
 
-public interface GameController {
+public interface ActionProvider {
     List<AbstractAction> getActions();
 }
