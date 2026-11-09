@@ -11,7 +11,7 @@ import static java.lang.Integer.max;
 import static ru.mipt.bit.platformer.util.Direction.getDirectionByRotation;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.continueProgress;
 
-public class Tank extends FieldObject {
+public class Tank extends FieldObject implements Healthable {
 
     private final GameWorld world;
 
@@ -20,11 +20,12 @@ public class Tank extends FieldObject {
 
     private final float speed;
     private int hitpoints;
+    private final int maxHitpoints;
     private final int damage;
 
     private static final float DEFAULT_MOVEMENT_SPEED = 0.4f;
     private static final int DEFAULT_HITPOINTS = 100;
-    private static final int DEFAULT_DAMAGE = 100;
+    private static final int DEFAULT_DAMAGE = 10;
 
     private long lastShootMoment = 0;
     private final long shootCoolDown = 1000;
@@ -37,6 +38,7 @@ public class Tank extends FieldObject {
         this.speed = speed;
         this.damage = damage;
         this.hitpoints = hitpoints;
+        this.maxHitpoints = hitpoints;
     }
 
     public Tank(GameWorld world, GridPoint2 coordinates) {
@@ -121,5 +123,9 @@ public class Tank extends FieldObject {
 
     public int getHitpoints() {
         return hitpoints;
+    }
+
+    public int getMaxHitpoints() {
+        return maxHitpoints;
     }
 }

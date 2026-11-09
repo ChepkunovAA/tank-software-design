@@ -2,6 +2,7 @@ package ru.mipt.bit.platformer.renderer;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.Rectangle;
 import org.junit.Test;
 import ru.mipt.bit.platformer.graphic.renderer.ObjectRenderer;
 import ru.mipt.bit.platformer.graphic.Scene;
@@ -112,6 +113,11 @@ public class SceneTest {
         @Override
         public void render(Batch batch, T object) {
             rendered.add(object);
+        }
+
+        @Override
+        public Rectangle getObjectBounds() {
+            return new Rectangle();
         }
 
         @Override

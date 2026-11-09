@@ -16,19 +16,19 @@ import ru.mipt.bit.platformer.actions.MoveAction;
 import ru.mipt.bit.platformer.actions.provider.NpcActionGenerator;
 import ru.mipt.bit.platformer.actions.provider.RandomNpcActionGenerator;
 import ru.mipt.bit.platformer.actions.ShootAction;
+import ru.mipt.bit.platformer.actions.ToggleHealthBarsAction;
 import ru.mipt.bit.platformer.game.GameLoop;
+import ru.mipt.bit.platformer.graphic.HealthBarVisibility;
 import ru.mipt.bit.platformer.graphic.RenderController;
 import ru.mipt.bit.platformer.graphic.RenderControllerImpl;
+import ru.mipt.bit.platformer.graphic.renderer.*;
 import ru.mipt.bit.platformer.input.InputHandler;
 import ru.mipt.bit.platformer.input.KeyboardInputHandler;
 import ru.mipt.bit.platformer.level.ConfiguredLevelFactory;
 import ru.mipt.bit.platformer.level.LevelFactory;
 import ru.mipt.bit.platformer.game.GameWorld;
 import ru.mipt.bit.platformer.objects.Tank;
-import ru.mipt.bit.platformer.graphic.renderer.BulletRenderer;
 import ru.mipt.bit.platformer.graphic.Scene;
-import ru.mipt.bit.platformer.graphic.renderer.TankRenderer;
-import ru.mipt.bit.platformer.graphic.renderer.TreeRenderer;
 import ru.mipt.bit.platformer.util.TileMovement;
 
 import java.util.ArrayList;
@@ -44,6 +44,7 @@ public class GameDesktopLauncher implements ApplicationListener {
     private ActionProvider actionProvider;
     private GameLoop gameLoop;
     private RenderController renderController;
+    private HealthBarVisibility healthBarVisibility = new HealthBarVisibility();
 
 
     @Override
@@ -74,7 +75,10 @@ public class GameDesktopLauncher implements ApplicationListener {
         TileMovement tileMovement = new TileMovement(groundLayer, Interpolation.smooth);
 
         Scene scene = new Scene(
-                new TankRenderer(TANK_TEXTURE, tileMovement),
+                new HealthBarRenderer<>(
+                        new TankRenderer(TANK_TEXTURE, tileMovement),
+                        healthBarVisibility,
+                        new HealthBarPainter()),
                 new TreeRenderer(TREE_TEXTURE, groundLayer),
                 new BulletRenderer(BULLET_TEXTURE, tileMovement));
         gameState.addObserver(scene);
@@ -93,7 +97,8 @@ public class GameDesktopLauncher implements ApplicationListener {
                 .addKey(Input.Keys.LEFT, MoveAction.LEFT(playerTank))
                 .addKey(Input.Keys.D, MoveAction.RIGHT(playerTank))
                 .addKey(Input.Keys.RIGHT, MoveAction.RIGHT(playerTank))
-                .addKey(Input.Keys.SPACE, new ShootAction(playerTank));
+                .addKey(Input.Keys.SPACE, new ShootAction(playerTank))
+                .addKey(Input.Keys.L, new ToggleHealthBarsAction(healthBarVisibility));
     }
 
     @Override

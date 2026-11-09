@@ -34,6 +34,11 @@ public abstract class FieldObjectRenderer<T extends FieldObject> implements Obje
         drawTextureRegionUnscaled(batch, textureRegion, position, object.getRotation());
     }
 
+    @Override
+    public Rectangle getObjectBounds() {
+        return position;
+    }
+
     protected abstract void positionAt(T object);
 
     @Override
