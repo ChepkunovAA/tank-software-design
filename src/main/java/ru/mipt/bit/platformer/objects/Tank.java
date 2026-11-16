@@ -2,6 +2,8 @@ package ru.mipt.bit.platformer.objects;
 
 import com.badlogic.gdx.math.GridPoint2;
 import ru.mipt.bit.platformer.game.GameWorld;
+import ru.mipt.bit.platformer.objects.state.LightTankState;
+import ru.mipt.bit.platformer.objects.state.TankState;
 import ru.mipt.bit.platformer.util.Direction;
 
 import java.util.Collections;
@@ -18,7 +20,7 @@ public class Tank extends FieldObject implements Healthable {
     private GridPoint2 targetCoordinates;
     private float movementProgress;
 
-    private final float speed;
+    private final float baseSpeed;
     private int hitpoints;
     private final int maxHitpoints;
     private final int damage;
@@ -28,17 +30,20 @@ public class Tank extends FieldObject implements Healthable {
     private static final int DEFAULT_DAMAGE = 10;
 
     private long lastShootMoment = 0;
-    private final long shootCoolDown = 1000;
+    private final long baseShootCooldowMs = 1000;
 
-    public Tank(GameWorld world, GridPoint2 coordinates, float speed, int hitpoints, int damage) {
+    private TankState state;
+
+    public Tank(GameWorld world, GridPoint2 coordinates, float baseSpeed, int hitpoints, int damage) {
         super(coordinates);
         this.world = world;
         this.targetCoordinates = coordinates;
         this.movementProgress = 1f;
-        this.speed = speed;
+        this.baseSpeed = baseSpeed;
         this.damage = damage;
         this.hitpoints = hitpoints;
         this.maxHitpoints = hitpoints;
+        this.state = new LightTankState(this);
     }
 
     public Tank(GameWorld world, GridPoint2 coordinates) {
@@ -58,6 +63,36 @@ public class Tank extends FieldObject implements Healthable {
             return;
         }
         hitpoints = max(0, hitpoints - damage);
+        updateState();
+    }
+
+    public void setState(TankState state) {
+        this.state = state;
+    }
+
+    public TankState getState() {
+        return state;
+    }
+
+    public void updateState() {
+        if (state != null) {
+            state.update();
+        }
+    }
+
+    public float getHitpointsRatio() {
+        if (maxHitpoints == 0) {
+            return 0f;
+        }
+        return (float) hitpoints / maxHitpoints;
+    }
+
+    public float getBaseSpeed() {
+        return baseSpeed;
+    }
+
+    public long getBaseCooldown() {
+        return baseShootCooldowMs;
     }
 
     @Override
@@ -69,7 +104,7 @@ public class Tank extends FieldObject implements Healthable {
     }
 
     public void tryShoot() {
-        if (isDestroyed() || !isAbleToShoot()) {
+        if (isDestroyed() || !state.canShoot() || !isAbleToShoot()) {
             return;
         }
 
@@ -99,7 +134,7 @@ public class Tank extends FieldObject implements Healthable {
 
     @Override
     public void live(float tick) {
-        movementProgress = continueProgress(movementProgress, tick, speed);
+        movementProgress = continueProgress(movementProgress, tick, state.getMovementSpeed());
         if (isFree()) {
             this.coordinates = targetCoordinates;
         }
@@ -110,7 +145,7 @@ public class Tank extends FieldObject implements Healthable {
     }
 
     private boolean isAbleToShoot() {
-        return System.currentTimeMillis() > lastShootMoment + shootCoolDown;
+        return System.currentTimeMillis() > lastShootMoment + state.getShootCooldown();
     }
 
     public GridPoint2 getTargetCoordinates() {
