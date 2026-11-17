@@ -83,7 +83,7 @@ public final class GdxGameUtils {
     }
 
     public static float continueProgress(float previousProgress, float deltaTime, float speed) {
-        return clamp(previousProgress + deltaTime / speed, 0f, 1f);
+        return clamp(previousProgress + deltaTime * speed, 0f, 1f);
     }
 
     private static Vector2 calculateTileCenter(TiledMapTileLayer tileLayer, GridPoint2 tileCoordinates) {
